@@ -1,68 +1,226 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Idea and Users
+<ul>
+  <li>Crayon-box is a bookshelf app for kids to keep them entertained at home during the pandemic by reading and creating their own books</li>
+  <li>Crayon-box is directed towards children who enjoy art, and writing</li>
+  <li>Children can safely design books without worrying about personal information or pictures being shared as each book is flitered by an Admin</li>
+  <li>How to Use:</li>
+  <ul>
+    <li>Users will register for an account/login</li>
+    <li>Users can update profile avatar(pre-set images)/author name</li>
+    <li>Users can design pictures and text for each page of their books</li>
+    <li>Users will be able to share their work, and look at books other users have created which have been approved by Admin</li>
+    <li>Users can access published picture books that they can also enjoy</li>
+  </ul>
+</ul>
 
-## Available Scripts
+## Features
+**MVP**
 
-In the project directory, you can run:
+**Profile**
+<ul>
+  <li>Register</li>
+  <li>Login</li>
+  <li>Edit</li>
+  <li>Delete</li>
+</ul>
 
-### `npm start`
+**Books**
+<ul>
+  <li>Create</li>
+  <li>Edit</li>
+  <li>Delete</li>
+</ul>
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+**Paint tool**
+<ul>
+  <li>Create paint app for creating new books</li>
+</ul>
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+**S3 Storage**
+<ul>
+  <li>For storing the images for the books</li>
+</ul>
 
-### `npm test`
+**icebox**
+- ability to share books with other users
+- invisible rating system that pushes popular books to the top of the list
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
+## Database
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Users
+```SQL
+create table users(
+  user_id serial primary key,
+  email text,
+  password text,
+  isAdmin boolean
+)
+```
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+Books
+```SQL
+create table books(
+  book_id serial primary key,
+  user_id int references users(user_id),
+  admin_approval boolean,
+  title text,
+)
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Pages
+```SQL
+create table pages(
+  page_id serial primary key,
+  book_id int references books(book_id)
+  content text,
+  image text
+)
+```
+## View
+<img src ="./src/screenshots/Login.png">
+<img src ="./src/screenshots/Register.png">
+<img src ="./src/screenshots/Profile.png">
+<img src ="./src/screenshots/CreateBook.png">
+<img src ="./src/screenshots/ReadBook.png">
+<img src ="./src/screenshots/PublishedBooks.png">
+<img src ="./src/screenshots/Wireframe.png">
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Server
+**dependencies**
+<ul>
+  <li>express</li>
+  <li>massive</li>
+  <li>dotenv</li>
+  <li>bcrypt</li>
+  <li>sessions</li>
+</ul>
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+**endpoints**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- User Accounts:
+  - app.post('/user/register)
+  - app.post('/user/login)
+  - app.put('/user/admin)
+  - app.delete('user/logout)
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- Pages:
+  - app.get('/pages')
+  - app.post('/pages/add')
+  - app.put('/pages/edit')
+  - app.delete('/pages/delete')
 
-## Learn More
+- Book:
+  - app.get('/books')
+  - app.get('/book/:book_id')
+  - app.delete('/books/delete')
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+**controllers**
+```
+USERS
 
-### Code Splitting
+POST ‘/user/register’
+async
+req.body = email, password
+req.session.user =  {
+userId
+email 
+{
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+POST ‘/user/login’
+async
+req.body = email, password
+if authenticated -> set req.session
 
-### Analyzing the Bundle Size
+PUT '/user/admin'
+async
+req.params = user_id
+toggle isAdmin -> true
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
 
-### Making a Progressive Web App
+DELETE ‘/user/logout’
+req.session.destroy()
+```
+```
+Pages
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+GET ‘/api/pages’
+async
+req.query = page_id
+send pages
 
-### Advanced Configuration
+POST‘/api/add’
+async
+req.body = page_id, book_id, content, image
+await -> insert
+send pages
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+PUT‘/api/edit’
+async
+req.params = page_id
+req.body = content, image
+await -> edit
+send pages
 
-### Deployment
+DELETE '/pages/delete'
+req.params = page_id
+req.body = content, image
+```
+```
+Books
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+GET ‘/api/books’
+async
+req.query = user_id
+send books
 
-### `npm run build` fails to minify
+GET '/book/:book_id'
+async
+req.params = book_id
+send book
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+DELETE
+
+req.params =  book_id
+req.body = title
+```
+## Client
+**dependencies**
+<ul>
+  <li>axios</li>
+  <li>redux/react-redux</li>
+  <li>redux-dev-tools</li>
+  <li>react-canvas-draw</li>
+  <li>react-flip-page</li>
+  <li>lz-string</li>
+  <li>S3</li>
+</ul>
+
+**routes**
+- Profile(/)
+- Admin(/admin)
+- Login(/login)
+- Register(/register)
+- AllBooks(/books)
+- CreateBook(/create)
+- ReadBook(/read)
+
+**File Structure**
+- src/
+  - App.js /.css
+  - index.js
+  - redux/
+    - store.js
+    - userReducer.js
+    - bookReducer.js
+  - components/
+   - Profile.js /.css
+   - Login.js /.css
+   - Register.js /.css
+   - Admin.js /.css
+   - CreateBook.js /.css
+   - ReadBook.js /.css
+   - Books.js /.css
+
